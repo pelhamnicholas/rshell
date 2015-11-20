@@ -1,4 +1,6 @@
 #include "parser.h"
+#include "instruction.h"
+#include "command.h"
 // used for handling commands
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -12,6 +14,7 @@ typedef tokenizer<escaped_list_separator<char> > so_tokenizer;
 int main(void) {
     string s;
     char ** cStr;
+    Instruction * instTree = NULL;
 
     // parser test
     Parser parser;
@@ -27,7 +30,7 @@ int main(void) {
             break;
 
         cStr = parser.tokenize(s);
-
+        /*
         // handle command
         pid_t c_pid, pid;
         int status;
@@ -80,5 +83,11 @@ int main(void) {
             cout << "free error caught" << endl;
             continue;
         }
+        */
+
+        if (instTree != NULL)
+            delete instTree;
+        instTree = new Command(cStr);
+        instTree->execute();
     }
 }

@@ -37,6 +37,7 @@ char ** Parser::get_cstrTokens() {
             //cout << endl;
         }
     }
+    cStr[j] = NULL;
 
     return cStr;
 }
