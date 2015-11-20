@@ -2,6 +2,7 @@
 
 Parser::Parser() {
     tokLine = NULL;
+    //cToken = NULL;
 }
 
 Parser::~Parser() {
@@ -16,6 +17,16 @@ char ** Parser::get_cstrTokens() {
 
     // get size
     int size = distance(tokLine->begin(), tokLine->end()) + 1;
+    
+    /*
+    // free memory is neccesary
+    if (cToken != NULL) {
+        for (int i = 0, cToken[i] != NULL, ++i)
+            free(cToken[i]);
+        free(cToken);
+    }
+    */
+
     // try catch
     cStr = (char **) malloc(size * sizeof(char*));
 
