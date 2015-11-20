@@ -1,7 +1,4 @@
-// used for tokenizing and converting to argv
-#include <string>
-#include <string.h>
-#include <boost/tokenizer.hpp>
+#include "parser.h"
 // used for handling commands
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -9,8 +6,6 @@
 #include <iostream>
 
 using namespace std;
-using boost::tokenizer;
-using boost::escaped_list_separator;
 
 typedef tokenizer<escaped_list_separator<char> > so_tokenizer;
 
@@ -18,7 +13,9 @@ int main(void) {
     string s;
     char ** cStr;
 
-    char * temp[64];
+    // parser test
+    Parser parser;
+
     while (1) {
 
         cout << "$ ";
@@ -29,36 +26,7 @@ int main(void) {
         if (s == "exit")
             break;
 
-        // parsing input into tokens
-        so_tokenizer tok(s, escaped_list_separator<char>('\\', ' ', '\"'));
-
-        // create argv
-        char ** temp;
-        int size = distance(tok.begin(), tok.end()) + 1;
-        try {
-            temp = (char**)malloc(size * sizeof(char*));
-        } catch (...) {
-            cout << "malloc error caught" << endl;
-            continue;
-        }
-        int j = 0;
-        for (so_tokenizer::iterator i = tok.begin(); i != tok.end(); ++i) {
-            //cout << *i << endl;
-            //cout << (*i).c_str() << endl;
-
-            try {
-                temp[j] = (char*) malloc(sizeof((*i).c_str()));
-                strcpy(temp[j++], (*i).c_str());
-            } catch (...) {
-                cout << "malloc error caught" << endl;
-                continue;
-            }
-        }
-        temp[j] = NULL;
-
-        // print argv
-        //for (int i = 0; temp[i] != NULL; ++i)
-            //cout << temp[i] << endl;
+        cStr = parser.tokenize(s);
 
         // handle command
         pid_t c_pid, pid;
@@ -75,7 +43,7 @@ int main(void) {
         } else if (c_pid == 0) {
             pid = getpid();
 
-            cout << "execvp returned: " << execvp(temp[0], temp) << endl;
+            cout << "execvp returned: " << execvp(cStr[0], cStr) << endl;
             //*error = execvp(temp[0], temp); // I think I'll need to return from here
             perror("Error executing");
             exit(12);
@@ -90,9 +58,9 @@ int main(void) {
  
         // free memory used by argv
         try {
-            for (int i = 0; i < size; ++i)
-                free(temp[i]);
-            //free(temp);
+            for (int i = 0; i < parser.size(); ++i)
+                free(cStr[i]);
+            free(cStr);
         } catch (...) {
             cout << "free error caught" << endl;
             continue;
