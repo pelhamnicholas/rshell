@@ -6,6 +6,7 @@
 #include "connector.h"
 #include "command.h"
 #include "exit.h"
+#include "test.h"
 
 #define NUMPARENS 1
 
@@ -27,7 +28,9 @@ class InstructionTree {
         ~InstructionTree();
         Instruction * getTree() { return tree; };
         Instruction * makeTree(char **);
+        Instruction * makeTree(char **, int &);
         char ** makeArgv(char **);
+        char ** makeArgv(char **, char *);
         char * removeOpenParen(char *);
         char * removeCloseParen(char *);
 };

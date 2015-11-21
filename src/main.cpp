@@ -30,19 +30,12 @@ int main(void) {
 
         cStr = parser.tokenize(s);
 
-        /*
-        // test commands
         if (instTree != NULL)
             delete instTree;
-        if (strcmp(cStr[0], "exit") == 0)
-            instTree = new Exit();
-        else
-            instTree = new Command(tree.makeArgv(cStr));
-        */
-
         instTree = tree.makeTree(cStr);
         
         // execute tree
-        instTree->execute();
+        if (instTree != NULL)
+            instTree->execute();
     }
 }
