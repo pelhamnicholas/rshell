@@ -5,15 +5,13 @@
 #include "instruction.h"
 #include "connector.h"
 #include "command.h"
-#include "exit.h"
+//#include "exit.h"
 
 #define NUMPARENS 1
 
 class InstructionTree {
     private:
         Instruction * tree;
-        static const char openParen[NUMPARENS];
-        static const char closeParen[NUMPARENS];
 
         bool hasValidParens(char **);
         bool isConnector(char *);
@@ -24,10 +22,14 @@ class InstructionTree {
         char * removeCloseParen(char *);
 
     public:
+        static const char openParen[NUMPARENS];
+        static const char closeParen[NUMPARENS];
+
         InstructionTree();
         ~InstructionTree();
         Instruction * getTree() { return tree; };
         Instruction * makeTree(char **);
+        char ** makeArgv(char **);
 };
 
 #endif

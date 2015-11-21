@@ -1,7 +1,7 @@
 #include "instructiontree.h"
 
-const char openParen = { '(' };
-const char closeParen = { ')' };
+const char InstructionTree::openParen[NUMPARENS] = { '(' };
+const char InstructionTree::closeParen[NUMPARENS] = { ')' };
 
 InstructionTree::InstructionTree() {
     tree = NULL;
@@ -47,14 +47,14 @@ bool InstructionTree::isComment(char * cStr) {
 
 bool InstructionTree::isOpenParen(char * cStr) {
     for (int i = 0; i < NUMPARENS; ++i)
-        if (cStr[0] = openParen[i])
+        if (cStr[0] == openParen[i])
             return true;
     return false;
 }
 
 bool InstructionTree::isCloseParen(char * cStr) {
     for (int i = 0; i < NUMPARENS; ++i)
-        if (cStr[strlen(cStr)-1] = closeParen[i])
+        if (cStr[strlen(cStr)-1] == closeParen[i])
             return true;
     return false;
 }
@@ -74,6 +74,38 @@ char * InstructionTree::removeCloseParen(char * cStr) {
 
 Instruction * InstructionTree::makeTree(char ** cStr) {
     Instruction * tree = NULL;
+
+    //if (cStr[0] != ) ;
+
     return tree;
+}
+
+char ** InstructionTree::makeArgv(char ** cStr) {
+    char ** argv = NULL;
+    int size = 0;
+    while (cStr[size] != NULL && !isComment(cStr[size]) 
+            && !isConnector(cStr[size]))
+        size++;
+    argv = (char**) malloc((size + 1) * sizeof(char*));
+
+    for (int i = 0; cStr[i] != NULL &&
+            !isComment(cStr[i]) && !isConnector(cStr[i]); ++i) {
+        if (isOpenParen(cStr[i])) {
+            argv[i] = (char*) malloc(
+                    (strlen(cStr[i]) - 1) * sizeof(char));
+            strcpy(argv[i], removeOpenParen(cStr[i]));
+        } else if (isCloseParen(cStr[i])) {
+            argv[i] = (char*) malloc(
+                    (strlen(cStr[i]) - 1) * sizeof(char));
+            strcpy(argv[i], removeCloseParen(cStr[i]));
+            break;
+        } else {
+            argv[i] = (char*) malloc(strlen(cStr[i]) * sizeof(char));
+            strcpy(argv[i], cStr[i]);
+        }
+    }
+    argv[size] = NULL;
+
+    return argv;
 }
 

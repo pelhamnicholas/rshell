@@ -9,7 +9,11 @@ Command::Command(char ** argv) {
 }
 
 Command::~Command() {
-    delete(argv); // or free the memory as appropriate
+    int i = 0;
+    while (argv[i] != NULL)
+        free(argv[i++]);
+    free(argv[i]);
+    free(argv);
 }
 
 void Command::addArgv(char ** argv) {

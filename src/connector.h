@@ -8,13 +8,14 @@
 class Connector : public Instruction {
     private:
         char * type;
-        static const char * const CONNECTOR[NUMCONNECTORS];
 
     protected:
         Instruction * left;
         Instruction * right;
 
-    private:
+    public:
+        static const char * const CONNECTOR[NUMCONNECTORS];
+
         Connector();
         Connector(char *);
         ~Connector();

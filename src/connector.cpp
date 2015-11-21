@@ -1,6 +1,7 @@
 #include "connector.h"
 
-const char * const CONNECTOR[NUMCONNECTORS] = { "&&", "||", ";" };
+const char * const Connector::CONNECTOR[NUMCONNECTORS] 
+        = { "&&", "||", ";" };
 
 Connector::Connector() {
     left = NULL;
