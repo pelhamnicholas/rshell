@@ -87,9 +87,13 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
     for ( ; cStr[i] != NULL; ++i) {
         if (isComment(cStr[i]))
             break;
-        else if (isCloseParen(cStr[i]))
+        else if (isCloseParen(cStr[i])) {
+            if (cStr[i][1] != '\0') {
+                cStr[i] = removeCloseParen(cStr[i]);
+                i--;
+            }
             break;
-        else if (isConnector(cStr[i])) {
+        } else if (isConnector(cStr[i])) {
             Connector * conn = new Connector(cStr[i]);
             tree = conn->setLeft(tree);
         } else if (strcmp(cStr[i], "exit") == 0) {//isExit(cStr[i])) {
@@ -117,12 +121,14 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
                 ;
         } else if (cStr[i][0] == '[') {
             // other test stuff
+            if (cStr[i][1] != '\0')
+                cStr[i] = removeOpenParen(cStr[i]);
             Test * test = new Test(makeArgv(&cStr[i], (char *) "]\0"));
             while (cStr[i] != NULL && !isComment(cStr[i]) &&
                     !isConnector(cStr[i]) && !isCloseParen(cStr[i])
                     && (cStr[i][strlen(cStr[i]) - 1] != ']'))
                 i++;
-            //i++;
+            i--;
             if (tree == NULL)
                 tree = test;
             else if (tree->getConnector() != NULL)
@@ -131,7 +137,10 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
                 // error - cannot connect commands
                 ;
         } else if (isOpenParen(cStr[i])) {
-            cStr[i] = removeOpenParen(cStr[i]);
+            if (cStr[i][1] != '\0')
+                cStr[i] = removeOpenParen(cStr[i]);
+            else
+                ++i;
             if (tree == NULL)
                 tree = makeTree(cStr, i);
             else if (tree->getConnector() != NULL) {
@@ -204,13 +213,16 @@ char ** InstructionTree::makeArgv(char ** cStr, char * delim) {
     argv = (char**) malloc((size + 1) * sizeof(char*));
 
     for (int i = 0; cStr[i] != NULL &&
-            !isComment(cStr[i]) && !isConnector(cStr[i])
-            && strcmp(cStr[i], delim); ++i) {
+            !isComment(cStr[i]) && !isConnector(cStr[i]); ++i) {
+            //&& strcmp(cStr[i], delim); ++i) { 
+            //replaced by closing paren part
         if (isOpenParen(cStr[i])) {
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
             strcpy(argv[i], removeOpenParen(cStr[i]));
-        } else if (isCloseParen(cStr[i])) {
+        } else if (isCloseParen(cStr[i]) 
+                || cStr[i][strlen(cStr[i])-1] == ']') {
+            // above was changed
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
             strcpy(argv[i], removeCloseParen(cStr[i]));
