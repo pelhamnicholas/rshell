@@ -126,9 +126,16 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
             Test * test = new Test(makeArgv(&cStr[i], (char *) "]\0"));
             while (cStr[i] != NULL && !isComment(cStr[i]) &&
                     !isConnector(cStr[i]) && !isCloseParen(cStr[i])
-                    && cStr[i][strlen(cStr[i]) - 1] == ']')
+                    && (cStr[i][strlen(cStr[i]) - 1] != ']'))
                 i++;
-            i--;
+            //i++;
+            if (tree == NULL)
+                tree = test;
+            else if (tree->getConnector() != NULL)
+                ((Connector*)tree)->setRight(test);
+            else
+                // error - cannot connect commands
+                ;
         } else if (isOpenParen(cStr[i])) {
             if (tree == NULL)
                 tree = makeTree(cStr, ++i);
@@ -208,6 +215,7 @@ char ** InstructionTree::makeArgv(char ** cStr, char * delim) {
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
             strcpy(argv[i], removeCloseParen(cStr[i]));
+            //cStr[i] = &cStr[i][strlen(cStr[i]-1)];
             break;
         } else {
             argv[i] = (char*) malloc(strlen(cStr[i]) * sizeof(char));
