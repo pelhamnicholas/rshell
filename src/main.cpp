@@ -19,13 +19,20 @@ int main(void) {
     Instruction * instTree = NULL;
     InstructionTree tree;
 
-    // parser test
+    // used for user@host prompt
+    char * name, host[16], pwd[128];
+
+    // parser
     Parser parser;
 
     while (1) {
+        // get name@host:pwd
+        name = getlogin();
+        gethostname(host, sizeof(host));
+        getcwd(pwd, sizeof(pwd));
 
         // get input
-        cout << "$ ";
+        cout << name << "@" << host << ":" << pwd << " $ ";
         getline(cin, s);
 
         cStr = parser.tokenize(s);

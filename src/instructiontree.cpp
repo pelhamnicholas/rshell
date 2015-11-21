@@ -61,10 +61,7 @@ bool InstructionTree::isCloseParen(char * cStr) {
 }
 
 char * InstructionTree::removeOpenParen(char * cStr) {
-    char * temp;
-    strcpy(temp, cStr);
-    temp = temp+sizeof(char);
-    return temp;
+    return cStr+sizeof(char);
 }
 
 /*
@@ -76,6 +73,7 @@ char * InstructionTree::removeCloseParen(char * cStr) {
     strcpy(temp, cStr);
     temp[strlen(cStr) - 1] = '\0';
     return temp;
+    return cStr;
 }
 
 Instruction * InstructionTree::makeTree(char ** cStr) {
