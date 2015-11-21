@@ -1,3 +1,10 @@
+/*
+ * Author: Nicholas Pelham
+ * Date  : 11/21/2015
+ *
+ * Test: tests if a file exists as a regular file or a directory
+ *       based on arguments passed through the command line
+ */
 #include "test.h"
 
 Test::Test() {
@@ -8,12 +15,20 @@ Test::Test(char ** argv) {
     this->argv = argv;
 }
 
+/*
+ * destructor: argv is allocated with c, so it's memory is
+ *             deallocated using fre()
+ */
 Test::~Test() {
     for (int i = 0; argv[i] != NULL; ++i)
         free(argv[i]);
     free(argv);
 }
 
+/*
+ * execute: uses POSIX stat() to test for a file whose path
+ *          is stored in argv
+ */
 int Test::execute() {
     struct stat sb;
 

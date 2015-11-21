@@ -1,5 +1,15 @@
+/*
+ * Author: Nicholas Pelham
+ * Date  : 11/21/2015
+ *
+ * instructiontree: used to create the tree of instructions
+ */
+
+// TO DO:
+//    Handle comments at any point within a string
 #include "instructiontree.h"
 
+// adding parentheses can be done just by changing these
 const char InstructionTree::openParen[NUMPARENS] = { '(' };
 const char InstructionTree::closeParen[NUMPARENS] = { ')' };
 
@@ -11,6 +21,10 @@ InstructionTree::~InstructionTree() {
     delete tree;
 }
 
+/*
+ * hasValidParens: checks that an array of c style strings has
+ *                 parentheses in the correct order and amount
+ */
 bool InstructionTree::hasValidParens(char ** cStr) {
     std::stack<char> parenStack;
 
@@ -33,6 +47,10 @@ bool InstructionTree::hasValidParens(char ** cStr) {
     return parenStack.empty();
 }
 
+/*
+ * isConnector: returns true is a c style string represents a
+ *              connector
+ */
 bool InstructionTree::isConnector(char * cStr) {
     for (int i = 0; i < NUMCONNECTORS; ++i)
         if (strcmp(cStr, Connector::CONNECTOR[i]) == 0)
@@ -40,12 +58,20 @@ bool InstructionTree::isConnector(char * cStr) {
     return false;
 }
 
+/*
+ * isComment: returns true is a c style string begins with a comment
+ *            ONLY WORKS FOR STRING WITH LEADING COMMENT
+ */
 bool InstructionTree::isComment(char * cStr) {
     if (cStr[0] == '#')
         return true;
     return false;
 }
 
+/*
+ * isOpenParen: returns true if a c style string begins with an 
+ *              opening parenthesis
+ */
 bool InstructionTree::isOpenParen(char * cStr) {
     for (int i = 0; i < NUMPARENS; ++i)
         if (cStr[0] == openParen[i])
@@ -53,6 +79,10 @@ bool InstructionTree::isOpenParen(char * cStr) {
     return false;
 }
 
+/*
+ * isCloseParen: returns true if a c style string ends with a
+ *               closing parenthesis
+ */
 bool InstructionTree::isCloseParen(char * cStr) {
     for (int i = 0; i < NUMPARENS; ++i)
         if (cStr[strlen(cStr)-1] == closeParen[i])
@@ -60,27 +90,46 @@ bool InstructionTree::isCloseParen(char * cStr) {
     return false;
 }
 
+/*
+ * removeOpenParen: removes the opening character of a c
+ *                  style string
+ *                  used to remove opening parentheses
+ */
 char * InstructionTree::removeOpenParen(char * cStr) {
     return cStr+sizeof(char);
 }
 
 /*
- * doesnt work
+ * removeCloseParen: removes the ending character of a c
+ *                   style string
+ *                   used to remove closing parentheses
  */
 char * InstructionTree::removeCloseParen(char * cStr) {
     cStr[strlen(cStr) - 1] = '\0';
     return cStr;
 }
 
+/*
+ * makeTree: creates a tree from the beginning of a c style
+ *           string
+ */
 Instruction * InstructionTree::makeTree(char ** cStr) {
     int i = 0;
 
-    if (!hasValidParens(cStr))
+    if (!hasValidParens(cStr)) {
+        cout << "Invalid parentheses amount/order" << endl;
         return tree;
+    }
 
     return makeTree(cStr, i);
 }
 
+/*
+ * makeTree: creates a tree from any point in an array of c style
+ *           strings
+ *           a reference to an integer is passed to synchronize 
+ *           with the creation of subtrees using recursion
+ */
 Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
     Instruction * tree = NULL;
 
@@ -96,7 +145,8 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
         } else if (isConnector(cStr[i])) {
             Connector * conn = new Connector(cStr[i]);
             tree = conn->setLeft(tree);
-        } else if (strcmp(cStr[i], "exit") == 0) {//isExit(cStr[i])) {
+        // exit command stuff
+        } else if (strcmp(cStr[i], "exit") == 0) {
             Exit * exit = new Exit();
             if (tree == NULL) {
                 tree = exit;
@@ -105,8 +155,8 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
             } else
                 // error - cannot connect commands
                 ;
+        // test command stuff
         } else if (strcmp(cStr[i], "test") == 0) {
-            // do test command stuff
             Test * test = new Test(makeArgv(&cStr[i]));
             while (cStr[i] != NULL && !isComment(cStr[i]) &&
                     !isConnector(cStr[i]) && !isCloseParen(cStr[i]))
@@ -120,7 +170,6 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
                 // error - cannot connect commands
                 ;
         } else if (cStr[i][0] == '[') {
-            // other test stuff
             if (cStr[i][1] != '\0')
                 cStr[i] = removeOpenParen(cStr[i]);
             Test * test = new Test(makeArgv(&cStr[i], (char *) "]\0"));
@@ -136,6 +185,7 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
             else
                 // error - cannot connect commands
                 ;
+        // create tree for parenthesis structure
         } else if (isOpenParen(cStr[i])) {
             if (cStr[i][1] != '\0')
                 cStr[i] = removeOpenParen(cStr[i]);
@@ -149,6 +199,7 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
             } else
                 // error - cannot connect to a comman
                 ;
+        // default command to use execvp()
         } else {
             Command * cmd = new Command(makeArgv(&cStr[i]));
             while (cStr[i] != NULL && !isComment(cStr[i]) &&
@@ -168,6 +219,10 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
     return tree;
 }
 
+/*
+ * makeArgv: used to seperate a part of an arracy of c style strings
+ *           into a new arracy to pass as arguments for a command
+ */
 char ** InstructionTree::makeArgv(char ** cStr) {
     char ** argv = NULL;
     int size = 0;
@@ -176,11 +231,8 @@ char ** InstructionTree::makeArgv(char ** cStr) {
         size++;
     argv = (char**) malloc((size + 1) * sizeof(char*));
 
-    for (int i = 0; cStr[i] != NULL &&
-            !isComment(cStr[i]) && !isConnector(cStr[i])
-            //&& ((strcmp(cStr[0], "[") || strcmp(cStr[0], "test"))
-                //&& strcmp(cStr[i], "]")) // for test
-            ; ++i) {
+    for (int i = 0; cStr[i] != NULL && !isComment(cStr[i])
+            && !isConnector(cStr[i]) ; ++i) {
         if (isOpenParen(cStr[i])) {
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
@@ -204,6 +256,10 @@ char ** InstructionTree::makeArgv(char ** cStr) {
     return argv;
 }
 
+/*
+ * makeArgv: used to create an array of arguments that ends at a special
+ *           delimiting character
+ */
 char ** InstructionTree::makeArgv(char ** cStr, char * delim) {
     char ** argv = NULL;
     int size = 0;
@@ -214,19 +270,15 @@ char ** InstructionTree::makeArgv(char ** cStr, char * delim) {
 
     for (int i = 0; cStr[i] != NULL &&
             !isComment(cStr[i]) && !isConnector(cStr[i]); ++i) {
-            //&& strcmp(cStr[i], delim); ++i) { 
-            //replaced by closing paren part
         if (isOpenParen(cStr[i])) {
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
             strcpy(argv[i], removeOpenParen(cStr[i]));
         } else if (isCloseParen(cStr[i]) 
-                || cStr[i][strlen(cStr[i])-1] == ']') {
-            // above was changed
+                || cStr[i][strlen(cStr[i])-1] == delim[0]) {
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
             strcpy(argv[i], removeCloseParen(cStr[i]));
-            //cStr[i] = &cStr[i][strlen(cStr[i]-1)];
             break;
         } else {
             argv[i] = (char*) malloc(strlen(cStr[i]) * sizeof(char));

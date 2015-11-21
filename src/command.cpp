@@ -1,3 +1,10 @@
+/*
+ * Author: Nicholas Pelham
+ * Date  : 11/21/2015
+ *
+ * Command: Wraper to execute commands not built into rshell
+ */
+
 #include "command.h"
 
 Command::Command() : Instruction() {
@@ -8,6 +15,10 @@ Command::Command(char ** argv) {
     this->argv = argv;
 }
 
+/*
+ * Deconstructor: argv is created by malloc(), so it is deleted
+ *                with free()
+ */
 Command::~Command() {
     int i = 0;
     while (argv[i] != NULL)
@@ -16,10 +27,18 @@ Command::~Command() {
     free(argv);
 }
 
+/*
+ * addArgv: sets argv after command is created.
+ *          Not used.
+ */
 void Command::addArgv(char ** argv) {
     this->argv = argv;
 }
 
+/*
+ * execute: forks the process to allow a command to run before continuing
+ *          program execution.
+ */
 int Command::execute() {
     pid_t c_pid, pid;
     int status;
@@ -63,17 +82,3 @@ int Command::execute() {
 
     return exeStatus;
 }
-
-/*
-Instruction * Command::connect(Connector * inst) { 
-    if (inst->getConnector() == NULL) 
-        return this;
-    if (inst->getLeft() == NULL) {
-        inst->setLeft(this);
-    } else if (inst->getRight() == NULL) {
-        inst->setRight(this);
-        return inst;
-    }
-    return this;
-}
-*/
