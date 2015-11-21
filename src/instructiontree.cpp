@@ -61,21 +61,62 @@ bool InstructionTree::isCloseParen(char * cStr) {
 
 char * InstructionTree::removeOpenParen(char * cStr) {
     char * temp;
-    cStr = cStr+sizeof(char);
     strcpy(temp, cStr);
+    temp = temp+sizeof(char);
     return temp;
 }
 
+/*
+ * doesnt work
+ */
 char * InstructionTree::removeCloseParen(char * cStr) {
     char * temp;
-    cStr[strlen(cStr)-1] = '\0';
-    return cStr;
+    temp = (char*) malloc((strlen(cStr)) * sizeof(char));
+    strcpy(temp, cStr);
+    temp[strlen(cStr) - 1] = '\0';
+    return temp;
 }
 
 Instruction * InstructionTree::makeTree(char ** cStr) {
     Instruction * tree = NULL;
 
-    //if (cStr[0] != ) ;
+    for (int i = 0; cStr[i] != NULL; ++i) {
+        if (isComment(cStr[i]))
+            break;
+        else if (isConnector(cStr[i])) {
+            Connector * conn = new Connector(cStr[i]);
+            tree = conn->setLeft(tree);
+        } else if (strcmp(cStr[i], "exit") == 0) {//isExit(cStr[i])) {
+            Exit * exit = new Exit();
+            if (tree == NULL) {
+                tree = exit;
+            } else if (tree->getConnector() != NULL) {
+                ((Connector*)tree)->setRight(exit);
+            } else
+                // error - cannot connect commands
+                ;
+        //} else if (isOpenParen(cStr[i])) {
+        //    if (tree->getConnector() != NULL) {
+        //        ((Connector *)tree)
+        //                ->setRight(makeSubTree((char**)cStr[i]), &i);
+        //    } else
+                // error - cannot connect to a comman
+        //        ;
+        } else {
+            Command * cmd = new Command(makeArgv(&cStr[i]));
+            while (cStr[i] != NULL && !isComment(cStr[i]) &&
+                    !isConnector(cStr[i]) && !isCloseParen(cStr[i])) 
+                i++;
+            i--;
+            if (tree == NULL) {
+                tree = cmd;
+            } else if (tree->getConnector() != NULL) {
+                tree = ((Connector*)tree)->setRight(cmd);
+            } else
+                // error - cannot connect commands
+                ;
+        }
+    }
 
     return tree;
 }

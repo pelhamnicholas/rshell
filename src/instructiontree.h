@@ -5,7 +5,7 @@
 #include "instruction.h"
 #include "connector.h"
 #include "command.h"
-//#include "exit.h"
+#include "exit.h"
 
 #define NUMPARENS 1
 
@@ -18,8 +18,6 @@ class InstructionTree {
         bool isComment(char *);
         bool isOpenParen(char *);
         bool isCloseParen(char *);
-        char * removeOpenParen(char *);
-        char * removeCloseParen(char *);
 
     public:
         static const char openParen[NUMPARENS];
@@ -30,6 +28,8 @@ class InstructionTree {
         Instruction * getTree() { return tree; };
         Instruction * makeTree(char **);
         char ** makeArgv(char **);
+        char * removeOpenParen(char *);
+        char * removeCloseParen(char *);
 };
 
 #endif

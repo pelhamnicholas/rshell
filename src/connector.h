@@ -1,6 +1,7 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
+#include <string.h>
 #include "instruction.h"
 
 #define NUMCONNECTORS 3
@@ -19,7 +20,7 @@ class Connector : public Instruction {
         Connector();
         Connector(char *);
         ~Connector();
-        //virtual Instruction * getConnector();
+        virtual Instruction * getConnector();
         Instruction * getLeft() { return left; };
         Instruction * getRight() { return right; };
         Instruction * setLeft(Instruction *);

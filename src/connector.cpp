@@ -19,6 +19,10 @@ Connector::~Connector() {
     delete right;
 }
 
+Instruction * Connector::getConnector() {
+    return this;
+}
+
 Instruction * Connector::setLeft(Instruction * inst) {
     if (left != NULL)
         return this;
@@ -35,17 +39,18 @@ Instruction * Connector::setRight(Instruction * inst) {
 
 int Connector::execute() {
     int c = 0;
-    while (c < NUMCONNECTORS && type != CONNECTOR[c++]) ;
+    while (c < NUMCONNECTORS && strcmp(type, CONNECTOR[c]) != 0) 
+        c++;
 
     switch (c) {
         case 0:
-            if (left->execute() != -1 && right->execute() != -1)
+            if (left->execute() == 0 && right->execute() == 0)
                 return 0;
             else
                 return -1;
             break;
         case 1:
-            if (left->execute() != -1 || right->execute() != -1)
+            if (left->execute() == 0 || right->execute() == 0)
                 return 0;
             else
                 return -1;
