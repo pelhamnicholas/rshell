@@ -68,25 +68,21 @@ char * InstructionTree::removeOpenParen(char * cStr) {
  * doesnt work
  */
 char * InstructionTree::removeCloseParen(char * cStr) {
-    char * temp;
-    temp = (char*) malloc((strlen(cStr)) * sizeof(char));
-    strcpy(temp, cStr);
-    temp[strlen(cStr) - 1] = '\0';
-    return temp;
+    cStr[strlen(cStr) - 1] = '\0';
     return cStr;
 }
 
 Instruction * InstructionTree::makeTree(char ** cStr) {
     int i = 0;
 
+    if (!hasValidParens(cStr))
+        return tree;
+
     return makeTree(cStr, i);
 }
 
 Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
     Instruction * tree = NULL;
-
-    if (!hasValidParens(cStr))
-        return tree;
 
     for ( ; cStr[i] != NULL; ++i) {
         if (isComment(cStr[i]))
@@ -135,11 +131,12 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
                 // error - cannot connect commands
                 ;
         } else if (isOpenParen(cStr[i])) {
+            cStr[i] = removeOpenParen(cStr[i]);
             if (tree == NULL)
-                tree = makeTree(cStr, ++i);
+                tree = makeTree(cStr, i);
             else if (tree->getConnector() != NULL) {
                 ((Connector *)tree)
-                        ->setRight(makeTree(cStr, ++i));
+                        ->setRight(makeTree(cStr, i));
             } else
                 // error - cannot connect to a comman
                 ;
@@ -179,10 +176,14 @@ char ** InstructionTree::makeArgv(char ** cStr) {
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
             strcpy(argv[i], removeOpenParen(cStr[i]));
+            cStr[i][0] = '(';
+            cStr[i][1] = '\0';
         } else if (isCloseParen(cStr[i])) {
             argv[i] = (char*) malloc(
                     (strlen(cStr[i]) - 1) * sizeof(char));
             strcpy(argv[i], removeCloseParen(cStr[i]));
+            cStr[i][0] = ')';
+            cStr[i][1] = '\0';
             break;
         } else {
             argv[i] = (char*) malloc(strlen(cStr[i]) * sizeof(char));
