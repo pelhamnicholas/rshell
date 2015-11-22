@@ -18,7 +18,9 @@ class InstructionTree {
         bool isConnector(char *);
         bool isComment(char *);
         bool isOpenParen(char *);
+        bool isOpenParen(char);
         bool isCloseParen(char *);
+        bool isCloseParen(char);
 
     public:
         static const char openParen[NUMPARENS];

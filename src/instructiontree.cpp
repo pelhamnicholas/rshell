@@ -29,21 +29,28 @@ bool InstructionTree::hasValidParens(char ** cStr) {
     std::stack<char> parenStack;
 
     for (int i = 0; cStr[i] != NULL; ++i) {
-        if (isOpenParen(cStr[i]))
-            parenStack.push(cStr[i][0]);
+        if (isOpenParen(cStr[i])) {
+            for (unsigned int j = 0; j < strlen(cStr[i]) && 
+                    isOpenParen(cStr[i][j]); ++j) {
+                parenStack.push(cStr[i][j]);
+            }
+        }
         if (isCloseParen(cStr[i])) {
             if (parenStack.empty())
                 return false;
-            int j;
-            for (j = 0; j < NUMPARENS &&
-                    closeParen[j] != cStr[i][strlen(cStr[i]) - 1]; ++j) ;
-            if (openParen[j] == parenStack.top()) {
-                parenStack.pop();
-            } else
-                return false;
+            for (int j = strlen(cStr[i]) - 1; j >= 0 && 
+                    isCloseParen(cStr[i][j]); --j) {
+                for (int k = 0; k < NUMPARENS; ++k) {
+                    if (cStr[i][j] == closeParen[k]) {
+                        if (openParen[k] != parenStack.top())
+                            return false;
+                        else
+                            parenStack.pop();
+                    }
+                }
+            }
         }
     }
-
     return parenStack.empty();
 }
 
@@ -73,8 +80,12 @@ bool InstructionTree::isComment(char * cStr) {
  *              opening parenthesis
  */
 bool InstructionTree::isOpenParen(char * cStr) {
+    return isOpenParen(cStr[0]);
+}
+
+bool InstructionTree::isOpenParen(char ch) {
     for (int i = 0; i < NUMPARENS; ++i)
-        if (cStr[0] == openParen[i])
+        if (ch == openParen[i])
             return true;
     return false;
 }
@@ -84,8 +95,12 @@ bool InstructionTree::isOpenParen(char * cStr) {
  *               closing parenthesis
  */
 bool InstructionTree::isCloseParen(char * cStr) {
+    return isCloseParen(cStr[strlen(cStr)-1]);
+}
+
+bool InstructionTree::isCloseParen(char ch) {
     for (int i = 0; i < NUMPARENS; ++i)
-        if (cStr[strlen(cStr)-1] == closeParen[i])
+        if (ch == closeParen[i])
             return true;
     return false;
 }
@@ -138,7 +153,7 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
             break;
         else if (isCloseParen(cStr[i])) {
             if (cStr[i][1] != '\0') {
-                cStr[i] = removeCloseParen(cStr[i]);
+                cStr[i] = &cStr[i][1];
                 i--; // to offset the for loop increment
             }
             break;
@@ -236,17 +251,18 @@ char ** InstructionTree::makeArgv(char ** cStr) {
 
     for (int i = 0; cStr[i] != NULL && !isComment(cStr[i])
             && !isConnector(cStr[i]) ; ++i) {
-        if (isOpenParen(cStr[i])) {
-            argv[i] = (char*) malloc(
-                    (strlen(cStr[i]) - 1) * sizeof(char));
-            strcpy(argv[i], removeOpenParen(cStr[i]));
-            cStr[i][0] = '(';
-            cStr[i][1] = '\0';
-        } else if (isCloseParen(cStr[i])) {
-            // get the size of the argument leading the closing paren
+//        if (isOpenParen(cStr[i])) {
+//            argv[i] = (char*) malloc(
+//                    (strlen(cStr[i]) - 1) * sizeof(char));
+//            strcpy(argv[i], removeOpenParen(cStr[i]));
+//            cStr[i][0] = '(';
+//            cStr[i][1] = '\0';
+/*        } else*/ if (isCloseParen(cStr[i])) {
+            // get the size of the argument leading the closing parens
             unsigned int tmp_size;
             for (int j = 0; j < NUMPARENS; ++j) {
-                for (tmp_size = 0; tmp_size < strlen(cStr[i]); ++tmp_size)
+                for (tmp_size = 0; tmp_size < strlen(cStr[i]); 
+                        ++tmp_size)
                     if (cStr[i][tmp_size] == closeParen[j])
                         break;
                 if (cStr[i][tmp_size] == closeParen[j])
@@ -258,10 +274,11 @@ char ** InstructionTree::makeArgv(char ** cStr) {
                 break;
             }
             argv[i] = (char*) malloc((tmp_size+1) * sizeof(char));
-            strncpy(argv[i], cStr[i], tmp_size); // perhaps removeCloseParen ?
+            strncpy(argv[i], cStr[i], tmp_size);
             argv[i][tmp_size] = '\0';
             // change cStr to point to closing paren
             cStr[i] = &cStr[i][tmp_size];
+            i--; // offset for the for loop from the call? 
             break;
         } else {
             argv[i] = (char*) malloc(strlen(cStr[i]) * sizeof(char));
