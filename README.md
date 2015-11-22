@@ -38,6 +38,8 @@ InstructionTree::closeParen[]` in instructiontree.cpp, and incrementing
 ##Tests
 Bash scripts are included in this repository to automate the testing of 
 various functionality of rshell.
+All test scripts are meant to be run from the rshell project directory, 
+not from the tests directory in which they reside.
 ###single_command
 Bash script to test the functionality of single commands using the POSIX 
 function `execvp()`
