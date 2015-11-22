@@ -15,7 +15,11 @@
 const char * const Connector::CONNECTOR[NUMCONNECTORS] 
         = { "&&", "||", ";" };
 
+/*
+ * Left and right are initialized to NULL
+ */
 Connector::Connector() {
+    type = NULL;
     left = NULL;
     right = NULL;
 }
@@ -27,9 +31,12 @@ Connector::Connector(char * cStr) {
 }
 
 Connector::~Connector() {
-    free(type);
-    delete left;
-    delete right;
+    if (type != NULL)
+        free(type);
+    if (left != NULL)
+        delete left;
+    if (right != NULL)
+        delete right;
 }
 
 /*
@@ -41,7 +48,7 @@ Instruction * Connector::getConnector() {
 }
 
 /*
- * setLet: Doesn't allow overwriting children
+ * setLeft: Doesn't allow overwriting children
  */
 Instruction * Connector::setLeft(Instruction * inst) {
     if (left != NULL)
@@ -51,10 +58,10 @@ Instruction * Connector::setLeft(Instruction * inst) {
 }
 
 /*
- * setLet: Doesn't allow overwriting children
+ * setRight: Doesn't allow overwriting children
  */
 Instruction * Connector::setRight(Instruction * inst) {
-    if(right != NULL)
+    if (right != NULL)
         return this;
     right = inst;
     return this;
@@ -65,11 +72,31 @@ Instruction * Connector::setRight(Instruction * inst) {
  *          according to the connector type
  */
 int Connector::execute() {
+
+    // check that both children exist
+    if (left == NULL && right == NULL)
+        return -1;
+    else if (right == NULL) {
+        if (left->execute() != 0)
+            return -1;
+        else if (strcmp(type, "&&") == 0)
+            return 0;
+        else
+            return -1;
+    } else if (left == NULL) {
+        if (right->execute() != 0)
+            return -1;
+        else if (strcmp(type, "&&") == 0)
+            return 0;
+        else
+            return -1;
+    }
+        
     int c = 0;
     while (c < NUMCONNECTORS && strcmp(type, CONNECTOR[c]) != 0) 
         c++;
 
-    // cased correllate to CONNECTOR which is defined above
+    // cases correllate to CONNECTOR as defined above
     switch (c) {
         case 0:
             if (left->execute() == 0 && right->execute() == 0)
@@ -91,17 +118,3 @@ int Connector::execute() {
     }
 }
 
-/*
-Instruction * Connector::connect(Instruction * inst) {
-    if (inst->getConnector() == NULL)
-        return inst->connect(this);
-    if (inst->getLeft() == NULL) {
-        inst->setLeft(this);
-        return inst;
-    } else if (inst->getRight == NULL) {
-        inst->setRight(this);
-        return inst;
-    }
-        return this;
-}
-*/

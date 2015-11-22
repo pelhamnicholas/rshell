@@ -19,7 +19,7 @@ int main(void) {
     Instruction * instTree = NULL;
     InstructionTree tree;
 
-    // used for user@host prompt
+    // used for user@host:pwd prompt
     char * name, host[16], pwd[128];
 
     // parser

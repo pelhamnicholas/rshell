@@ -251,13 +251,7 @@ char ** InstructionTree::makeArgv(char ** cStr) {
 
     for (int i = 0; cStr[i] != NULL && !isComment(cStr[i])
             && !isConnector(cStr[i]) ; ++i) {
-//        if (isOpenParen(cStr[i])) {
-//            argv[i] = (char*) malloc(
-//                    (strlen(cStr[i]) - 1) * sizeof(char));
-//            strcpy(argv[i], removeOpenParen(cStr[i]));
-//            cStr[i][0] = '(';
-//            cStr[i][1] = '\0';
-/*        } else*/ if (isCloseParen(cStr[i])) {
+        if (isCloseParen(cStr[i])) {
             // get the size of the argument leading the closing parens
             unsigned int tmp_size;
             for (int j = 0; j < NUMPARENS; ++j) {

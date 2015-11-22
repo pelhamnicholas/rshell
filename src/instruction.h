@@ -7,8 +7,8 @@ class Instruction {
     private:
 
     public:
-        Instruction();
-        virtual ~Instruction();
+        Instruction() {};
+        virtual ~Instruction() {};
         virtual Instruction * getConnector() { return NULL; };
         virtual int execute() = 0;
 };
