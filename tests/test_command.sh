@@ -8,7 +8,7 @@
 touch "has spaces in its name"
 
 # list of files used in tests
-declare -a test_files=("README.md" "src" "nonexistant.file" "makefile" "tests/test_command.sh" "has\ spaces\ in\ its\ name")
+declare -a test_files=("README.md" "src" "nonexistant.file" "makefile" "tests/test_command.sh" "has\ spaces\ in\ its\ name" "\"has spaces in its name\"")
 
 #
 # tests basic functionality on an assortment of files
@@ -16,28 +16,31 @@ declare -a test_files=("README.md" "src" "nonexistant.file" "makefile" "tests/te
 for FILE in "${test_files[@]}"
 do
 # test -e on $FILE
-    echo "Input Line: ";
-    echo "test -e $FILE && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit" ;
-    sleep .5;
+    echo "Input Line: "
+    echo "test -e $FILE && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
     echo "test -e $FILE && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit" | bin/rshell
-    echo "" ;
-    sleep .5;
+    echo ""
+    sleep .5
 
 # test -f on $FILE
-    echo "Input Line: ";
-    echo "( ( test -f $FILE && echo \"$FILE exists and is a regular file\" ) || ( test -e $FILE && echo \"$FILE exists but is not a regular file\" ) ) || echo \"$FILE does not exist\" ; exit" ;
-    sleep .5;
+    echo "Input Line: "
+    echo "( ( test -f $FILE && echo \"$FILE exists and is a regular file\" ) || ( test -e $FILE && echo \"$FILE exists but is not a regular file\" ) ) || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
     echo "( ( test -f $FILE && echo \"$FILE exists and is a regular file\" ) || ( test -e $FILE && echo \"$FILE exists but is not a regular file\" ) ) || echo \"$FILE does not exist\" ; exit" | bin/rshell
-    echo "" ;
-    sleep .5;
+    echo ""
+    sleep .5
 
 # test -d on $FILE
     echo "Input Line: "
-    echo "( ( test -d $FILE && echo \"$FILE exists and is a directory\" ) || ( test -e $FILE && echo \"$FILE exists but is not a directory\" ) ) || echo \"$FILE does not exist\" ; exit" ;
-    sleep .5;
+    echo "( ( test -d $FILE && echo \"$FILE exists and is a directory\" ) || ( test -e $FILE && echo \"$FILE exists but is not a directory\" ) ) || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
     echo "( ( test -d $FILE && echo \"$FILE exists and is a directory\" ) || ( test -e $FILE && echo \"$FILE exists but is not a directory\" ) ) || echo \"$FILE does not exist\" ; exit" | bin/rshell
-    echo "" ;
-    sleep .5;
+    echo ""
+    sleep .5
 done
 
 #
@@ -46,28 +49,31 @@ done
 for FILE in "${test_files[@]}"
 do
 #test -e on #file
-    echo "Input Line: " ;
-    echo "[ -e $FILE ] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit" ;
-    sleep .5;
+    echo "Input Line: "
+    echo "[ -e $FILE ] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
     echo "[ -e $FILE ] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit" | bin/rshell
-    echo "" ;
-    sleep .5;
+    echo ""
+    sleep .5
 
 # test -f on #file
-    echo "Input Line: " ;
-    echo "( ( [ -f $FILE ] && echo \"$FILE exists and is a regular file\" ) || ( [ -e $FILE ] && echo \"$FILE exists but is not a regular file\" ) ) || echo \"$FILE does not exist\" ; exit" ;
-    sleep .5;
+    echo "Input Line: "
+    echo "( ( [ -f $FILE ] && echo \"$FILE exists and is a regular file\" ) || ( [ -e $FILE ] && echo \"$FILE exists but is not a regular file\" ) ) || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
     echo "( ( [ -f $FILE ] && echo \"$FILE exists and is a regular file\" ) || ( [ -e $FILE ] && echo \"$FILE exists but is not a regular file\" ) ) || echo \"$FILE does not exist\" ; exit" | bin/rshell
-    echo "" ;
-    sleep .5;
+    echo ""
+    sleep .5
 
 # test -d on #file
-    echo "Input Line: " ;
-    echo "( ( [ -d $FILE ] && echo \"$FILE exists and is a regular file\" ) || ( [ -e $FILE ] && echo \"$FILE exists but is not a directory\" ) ) || echo \"$FILE does not exist\" ; exit" ;
-    sleep .5;
+    echo "Input Line: "
+    echo "( ( [ -d $FILE ] && echo \"$FILE exists and is a regular file\" ) || ( [ -e $FILE ] && echo \"$FILE exists but is not a directory\" ) ) || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
     echo "( ( [ -f $FILE ] && echo \"$FILE exists and is a regular file\" ) || ( [ -e $FILE ] && echo \"$FILE exists but is not a directory\" ) ) || echo \"$FILE does not exist\" ; exit" | bin/rshell
-    echo "" ;
-    sleep .5;
+    echo ""
+    sleep .5
 done
 
 #
@@ -75,11 +81,13 @@ done
 #
 for FILE in "${test_files[@]}"
 do
-    echo "Input Line: " ;
-    echo "[ $FILE ] && echo \"$FILE exists\" ; exit" ;
-    sleep .5 ;
-    echo "[ $FILE ] && echo \"$FILE exists\" ; exit" | bin/rshell
-    echo "" ;
+    echo "Input Line: "
+    echo "[ $FILE ] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
+    echo "[ $FILE ] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit" | bin/rshell
+    echo ""
+    sleep .5
 done
 
 #
@@ -87,35 +95,64 @@ done
 #
 for FILE in "${test_files[@]}"
 do
-    echo "Input Line: " ;
-    echo "[e $FILE] && echo \"$FILE exists\" ; exit" ;
-    sleep .5 ;
-    echo "[e $FILE] && echo \"$FILE exists\" ; exit" | bin/rshell
-    echo "" ;
-done
-for FILE in "${test_files[@]}"
-do
-    echo "Input Line: " ;
-    echo "[-e $FILE] && echo \"$FILE exists\" ; exit" ;
-    sleep .5 ;
-    echo "[-e $FILE] && echo \"$FILE exists\" ; exit" | bin/rshell
-    echo "" ;
-done
-for FILE in "${test_files[@]}"
-do
-    echo "Input Line: " ;
-    echo "[-f $FILE ] && echo \"$FILE exists and is a regular file\" ; exit" ;
-    sleep .5 ;
+    echo "Input Line: "
+    echo "[e $FILE] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
+    echo "[e $FILE] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit" | bin/rshell
+    echo ""
+    sleep .5
+
+    echo "Input Line: "
+    echo "[-e $FILE] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit"
+    sleep .5
+    echo "Output: "
+    echo "[-e $FILE] && echo \"$FILE exists\" || echo \"$FILE does not exist\" ; exit" | bin/rshell
+    echo ""
+    sleep .5
+
+    echo "Input Line: "
+    echo "[-f $FILE ] && echo \"$FILE exists and is a regular file\" ; exit"
+    sleep .5
+    echo "Output: "
     echo "[-f $FILE ] && echo \"$FILE exists and is a regular file\" ; exit" | bin/rshell
-    echo "" ;
-done
-for FILE in "${test_files[@]}"
-do
-    echo "Input Line: " ;
-    echo "[ -d $FILE] && echo \"$FILE exists and is a directory\" ; exit" ;
+    echo ""
+    sleep .5
+
+    echo "Input Line: "
+    echo "[ -d $FILE] && echo \"$FILE exists and is a directory\" ; exit"
     sleep .5;
+    echo "Output: "
     echo "[ -d $FILE] && echo \"$FILE exists and is a directory\" ; exit" | bin/rshell
-    echo "" ;
+    echo ""
+    sleep .5
 done
 
-rm has\ spaces\ in\ its\ name
+#
+# tests missing filepath parameter
+#
+echo "Input Line: "
+echo "test -e && echo \" exists\" || echo \" does not exist\" ; exit"
+sleep .5
+echo "Output: "
+echo "test -e && echo \" exists\" || echo \" does not exist\" ; exit" | bin/rshell
+echo ""
+sleep .5
+
+echo "Input Line: "
+echo "test && echo \" exists\" || echo \" does not exist\" ; exit"
+sleep .5
+echo "Output: "
+echo "test && echo \" exists\" || echo \" does not exist\" ; exit" | bin/rshell
+echo ""
+sleep .5
+
+echo "Input Line: "
+echo "[] && echo \" exists\" || echo \" does not exist\" ; exit"
+sleep .5
+echo "Output: "
+echo "[] && echo \" exists\" || echo \" does not exist\" ; exit" | bin/rshell
+echo ""
+sleep .5
+
+rm "has spaces in its name"

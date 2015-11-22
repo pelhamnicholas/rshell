@@ -48,7 +48,7 @@ bool InstructionTree::hasValidParens(char ** cStr) {
 }
 
 /*
- * isConnector: returns true is a c style string represents a
+ * isConnector: returns true if a c style string represents a
  *              connector
  */
 bool InstructionTree::isConnector(char * cStr) {
@@ -105,7 +105,7 @@ char * InstructionTree::removeOpenParen(char * cStr) {
  *                   used to remove closing parentheses
  */
 char * InstructionTree::removeCloseParen(char * cStr) {
-    cStr[strlen(cStr) - 1] = '\0';
+    //cStr[strlen(cStr) - 1] = '\0';
     return cStr;
 }
 
@@ -139,7 +139,7 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
         else if (isCloseParen(cStr[i])) {
             if (cStr[i][1] != '\0') {
                 cStr[i] = removeCloseParen(cStr[i]);
-                i--;
+                i--; // to offset the for loop increment
             }
             break;
         } else if (isConnector(cStr[i])) {
@@ -154,37 +154,40 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
                 ((Connector*)tree)->setRight(exit);
             } else
                 // error - cannot connect commands
-                ;
+                delete exit;
         // test command stuff
         } else if (strcmp(cStr[i], "test") == 0) {
             Test * test = new Test(makeArgv(&cStr[i]));
             while (cStr[i] != NULL && !isComment(cStr[i]) &&
                     !isConnector(cStr[i]) && !isCloseParen(cStr[i]))
                 i++;
-            i--;
+            i--; // to offset the for loop increment
             if (tree == NULL)
                 tree = test;
             else if (tree->getConnector() != NULL) {
                 ((Connector*)tree)->setRight(test);
             } else
                 // error - cannot connect commands
-                ;
+                delete test;
+        // test command stuff
         } else if (cStr[i][0] == '[') {
             if (cStr[i][1] != '\0')
-                cStr[i] = removeOpenParen(cStr[i]);
+                cStr[i] = &cStr[i][1];//removeOpenParen(cStr[i]);
+            else
+                i++;
             Test * test = new Test(makeArgv(&cStr[i], (char *) "]\0"));
             while (cStr[i] != NULL && !isComment(cStr[i]) &&
-                    !isConnector(cStr[i]) && !isCloseParen(cStr[i])
+                    !isConnector(cStr[i])// && !isCloseParen(cStr[i])
                     && (cStr[i][strlen(cStr[i]) - 1] != ']'))
                 i++;
-            i--;
+            //i--; // to offset the for loop increment
             if (tree == NULL)
                 tree = test;
             else if (tree->getConnector() != NULL)
                 ((Connector*)tree)->setRight(test);
             else
                 // error - cannot connect commands
-                ;
+                delete test;
         // create tree for parenthesis structure
         } else if (isOpenParen(cStr[i])) {
             if (cStr[i][1] != '\0')
@@ -197,7 +200,7 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
                 ((Connector *)tree)
                         ->setRight(makeTree(cStr, i));
             } else
-                // error - cannot connect to a comman
+                // error - cannot connect to a command
                 ;
         // default command to use execvp()
         } else {
@@ -212,7 +215,7 @@ Instruction * InstructionTree::makeTree(char ** cStr, int & i) {
                 tree = ((Connector*)tree)->setRight(cmd);
             } else
                 // error - cannot connect commands
-                ;
+                delete cmd;
         }
     }
 
@@ -240,11 +243,25 @@ char ** InstructionTree::makeArgv(char ** cStr) {
             cStr[i][0] = '(';
             cStr[i][1] = '\0';
         } else if (isCloseParen(cStr[i])) {
-            argv[i] = (char*) malloc(
-                    (strlen(cStr[i]) - 1) * sizeof(char));
-            strcpy(argv[i], removeCloseParen(cStr[i]));
-            cStr[i][0] = ')';
-            cStr[i][1] = '\0';
+            // get the size of the argument leading the closing paren
+            unsigned int tmp_size;
+            for (int j = 0; j < NUMPARENS; ++j) {
+                for (tmp_size = 0; tmp_size < strlen(cStr[i]); ++tmp_size)
+                    if (cStr[i][tmp_size] == closeParen[j])
+                        break;
+                if (cStr[i][tmp_size] == closeParen[j])
+                    break;
+            }
+            // allocate space for argv
+            if (tmp_size == 0) {
+                argv[i] = NULL;
+                break;
+            }
+            argv[i] = (char*) malloc((tmp_size+1) * sizeof(char));
+            strncpy(argv[i], cStr[i], tmp_size); // perhaps removeCloseParen ?
+            argv[i][tmp_size] = '\0';
+            // change cStr to point to closing paren
+            cStr[i] = &cStr[i][tmp_size];
             break;
         } else {
             argv[i] = (char*) malloc(strlen(cStr[i]) * sizeof(char));
@@ -270,15 +287,17 @@ char ** InstructionTree::makeArgv(char ** cStr, char * delim) {
 
     for (int i = 0; cStr[i] != NULL &&
             !isComment(cStr[i]) && !isConnector(cStr[i]); ++i) {
-        if (isOpenParen(cStr[i])) {
-            argv[i] = (char*) malloc(
-                    (strlen(cStr[i]) - 1) * sizeof(char));
-            strcpy(argv[i], removeOpenParen(cStr[i]));
-        } else if (isCloseParen(cStr[i]) 
-                || cStr[i][strlen(cStr[i])-1] == delim[0]) {
-            argv[i] = (char*) malloc(
-                    (strlen(cStr[i]) - 1) * sizeof(char));
-            strcpy(argv[i], removeCloseParen(cStr[i]));
+        // there is no case for parentheses
+        if (cStr[i][strlen(cStr[i])-1] == delim[0]) {
+            if (strcmp(cStr[i], delim) == 0) {
+                argv[i] = NULL;
+                break;
+            }
+            // allocate space for argv[i]
+            unsigned int tmp_size = strlen(cStr[i]);
+            argv[i] = (char*) malloc(tmp_size * sizeof(char));
+            strncpy(argv[i], cStr[i], tmp_size-1);
+            argv[i][tmp_size-1] = '\0';
             break;
         } else {
             argv[i] = (char*) malloc(strlen(cStr[i]) * sizeof(char));
