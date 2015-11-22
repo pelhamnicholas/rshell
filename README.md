@@ -1,5 +1,8 @@
 #rshell
 
+A basic command shell created as a part of the cirriculum for Software 
+Construction at the University of California - Riverside.
+
 ##Overview
 
 rshell is a simple shell program that serves as an interface between a user 
@@ -35,6 +38,17 @@ InstructionTree::closeParen[]` in instructiontree.cpp, and incrementing
 ##Tests
 Bash scripts are included in this repository to automate the testing of 
 various functionality of rshell.
+###single_command
+Bash script to test the functionality of single commands using the POSIX 
+function `execvp()`
+###multi_command
+Bash script to test the functionality of connectors `&&`, `||`, and `;` in 
+rshell
+###commented_command
+Bash script to test the functionality of commented lines in rshell by using 
+the `#` character
+###exit
+Bash script to test the functionality of the `exit` command in rshell
 ###test_command
 Bash shell script to test the functionality of the test command in rshell
 ###precedence_test
@@ -53,6 +67,8 @@ include, but are not limited to:
     * logout
 * All output from rshell is monocolored. Any colors expected in shell output
 are not displayed
+* Using an escape character can cause unexpected crashes when escaping 
+characters other than `"`, `\`, and ` `.
 
 ##Contributors
 Nicholas Pelham : [website](http://pelhamnicholas.wordpress.com)
